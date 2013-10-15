@@ -1,0 +1,9 @@
+[submodule "application"]
+        path = application
+        url = git@github.com:jregeimbal/application.git
+[submodule "application_php"]
+        path = application_php
+        url = git@github.com:jregeimbal/application_php.git
+[submodule "application_php_wordpress"]
+        path = application_php_wordpress
+        url = git@github.com:jregeimbal/application_php_wordpress.git
