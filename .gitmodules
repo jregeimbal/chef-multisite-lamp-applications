@@ -1,9 +1,9 @@
 [submodule "cookbooks/application"]
-        path = cookbooks/application
-        url = git@github.com:jregeimbal/application.git
+    path = cookbooks/application
+    url = git@github.com:jregeimbal/application.git
 [submodule "cookbooks/application_php"]
-        path = cookbooks/application_php
-        url = git@github.com:jregeimbal/application_php.git
+    path = cookbooks/application_php
+    url = git@github.com:jregeimbal/application_php.git
 [submodule "cookbooks/application_php_wordpress"]
-        path = cookbooks/application_php_wordpress
-        url = git@github.com:jregeimbal/application_php_wordpress.git
+	path = cookbooks/application_php_wordpress
+	url = git@github.com:jregeimbal/application_php_wordpress.git
