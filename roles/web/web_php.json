@@ -1,0 +1,17 @@
+{
+  "name": "web_php",
+  "chef_type": "role",
+  "json_class": "Chef::Role",
+  "default_attributes": {},
+  "description": "The base role for systems that serve HTTP traffic",
+  "run_list": [
+    "role[web]",
+    "recipe[php]",
+    "recipe[apache2::mod_php5]",
+    "recipe[php::module_apc]",
+    "recipe[php::module_curl]",
+    "recipe[php::module_mysql]"
+  ],
+  "env_run_lists" : {},
+  "override_attributes": {}
+}

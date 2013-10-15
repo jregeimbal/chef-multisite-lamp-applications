@@ -1,0 +1,18 @@
+<VirtualHost *:80>
+    ServerName <%= @params[:server_name] %>
+    <% if @params[:server_aliases] then %>ServerAlias <% @params[:server_aliases].each do |a| %><%= "#{a}" %> <% end %><% end %>
+    DocumentRoot <%= @params[:docroot] %>
+     
+    <Directory />
+        Options FollowSymLinks
+        AllowOverride None
+    </Directory>
+     
+    <Directory <%= @params[:docroot] %> >
+        Options Indexes FollowSymLinks MultiViews
+        AllowOverride none
+        Order allow,deny
+        allow from all
+    </Directory>
+     
+</VirtualHost>

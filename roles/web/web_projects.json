@@ -1,0 +1,13 @@
+{
+  "name": "web_projects",
+  "chef_type": "role",
+  "json_class": "Chef::Role",
+  "default_attributes": {},
+  "description": "This role will use web_projects attribute to setup applications",
+  "run_list": [
+    "role[web/web_php]",
+    "recipe[web_projects]"
+  ],
+  "env_run_lists" : {},
+  "override_attributes": {}
+}

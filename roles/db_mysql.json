@@ -1,0 +1,18 @@
+{
+  "name": "db_mysql",
+  "chef_type": "role",
+  "json_class": "Chef::Role",
+  "default_attributes": {
+    "mysql": {
+      "server_debian_password": "!p@ssw0rd",
+      "server_root_password": "!p@ssw0rd",
+      "server_repl_password": "!p@ssw0rd"
+    }
+  },
+  "description": "Mysql Database Server Role",
+  "run_list": [
+    "role[base]",
+    "recipe[mysql::server]",
+    "recipe[mysql::client]"
+  ]
+}
