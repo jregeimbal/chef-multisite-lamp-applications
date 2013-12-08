@@ -38,6 +38,7 @@ node["web_projects"].split(",").each do |project|
   app_settings = env_settings["application"]
   db_settings = env_settings["database"]
   wp_settings = env_settings["wordpress"]
+  drupal_settings = settings[settings_env]["drupal"]
   yii_settings = env_settings["yii"]
 
   if vhost_settings
@@ -51,7 +52,7 @@ node["web_projects"].split(",").each do |project|
 
   if yii_settings then
     include_recipe "yii"
-  end  
+  end
 
   group "www-data" do
     action :modify
@@ -59,7 +60,6 @@ node["web_projects"].split(",").each do |project|
     append true
   end
 
-   
   # Deploy Using the PHP Wordpress Application Cookbook
   application project do
     action :deploy
@@ -70,6 +70,7 @@ node["web_projects"].split(",").each do |project|
     enable_submodules true
     deploy_key app_settings["deploy_key"] if app_settings["deploy_key"]
     revision app_settings["branch"] || "master"
+    packages app_settings["packages"]
 
     if wp_settings then
       symlinks(
@@ -79,13 +80,13 @@ node["web_projects"].split(",").each do |project|
       wordpress do
         local_settings_file   "wp-config.php"
         database do
-          db_name       db_settings["db_name"]
-          db_user       db_settings["db_user"]
-          db_password   db_settings["db_password"]
-          db_host       db_settings["db_host"]
-          db_charset    db_settings["db_charset"]
-          db_collate    db_settings["db_collate"]
-          table_prefix  db_settings["table_prefix"]
+          db_name       wp_settings["name"] || db_settings["name"]
+          db_user       wp_settings["user"] || db_settings["user"]
+          db_password   wp_settings["password"] || db_settings["password"]
+          db_host       wp_settings["host"] || db_settings["host"]
+          db_charset    wp_settings["charset"] || db_settings["charset"]
+          db_collate    wp_settings["collate"] || db_settings["collate"]
+          table_prefix  wp_settings["table_prefix"] || db_settings["table_prefix"]
         end
         wp_params do
           auth_key          wp_settings["auth_key"] == 'RANDOM' ? secure_password : wp_settings["auth_key"]
@@ -108,15 +109,35 @@ node["web_projects"].split(",").each do |project|
         end
       end
     end
+
+    if drupal_settings then
+      symlinks(
+        "settings.php" => "sites/default/settings.php"
+      )
+      # drupal do
+      #   local_settings_file   "settings.php"
+      #   database do
+      #     db_name       drupal_settings["name"] || db_settings["name"]
+      #     db_user       drupal_settings["user"] || db_settings["user"]
+      #     db_password   drupal_settings["password"] || db_settings["password"]
+      #     db_host       drupal_settings["host"] || db_settings["host"]
+      #     db_charset    drupal_settings["charset"] || db_settings["charset"]
+      #     db_collate    drupal_settings["collate"] || db_settings["collate"]
+      #     prefix        drupal_settings["table_prefix"] || db_settings["table_prefix"]
+      #   end
+      # end
+    end
   end
 
-  # wordpress thing! :
-  directory "wordpress upload directory" do
-    path app_settings['path'] + '/shared/uploads'
-    owner "www-data"
-    group "www-data"
-    mode 00775
-    action :create
+  if wp_settings then
+    # wordpress thing! :
+    directory "wordpress upload directory" do
+      path app_settings['path'] + '/shared/uploads'
+      owner "www-data"
+      group "www-data"
+      mode 00775
+      action :create
+    end
   end
 
   execute "fixup apppath group write" do
@@ -124,26 +145,46 @@ node["web_projects"].split(",").each do |project|
     # only_if { Etc.getpwuid(File.stat(vhost_settings['docroot']).uid).name != "bob" }
   end
 
-  mysql_connection_info = {
-    :host     => db_settings["db_host"],
-    :username => 'root',
-    :password => node['mysql']['server_root_password']
-  }
+  if db_settings then
+    mysql_connection_info = {
+      :host     => db_settings["host"],
+      :username => 'root',
+      :password => node['mysql']['server_root_password']
+    }
 
-  # Create a mysql database
-  mysql_database db_settings["db_name"] do
-    connection mysql_connection_info
-    action :create
-  end
+    # Create a mysql database
+    mysql_database db_settings["name"] do
+      connection mysql_connection_info
+      action :create
+    end
 
-  # Grant SELECT, UPDATE, and INSERT privileges to all tables in foo db from all hosts
-  mysql_database_user db_settings["db_user"] do
-    connection    mysql_connection_info
-    password      db_settings["db_password"]
-    database_name db_settings["db_name"]
-    host          'localhost' == db_settings["db_host"] ? "localhost" : "%"
-    privileges    [:select,:update,:insert,:create,:delete]
-    action        :grant
+    # Grant SELECT, UPDATE, and INSERT privileges to all tables in foo db from all hosts
+    mysql_database_user db_settings["user"] do
+      connection    mysql_connection_info
+      password      db_settings["password"]
+      database_name db_settings["name"]
+      host          'localhost' == db_settings["host"] ? "localhost" : "%"
+      privileges    [:all]
+      action        :grant
+    end
+
+    if db_settings["source"] then
+      source = db_settings["source"]
+
+      if db_settings["host"] then
+      
+        Chef::Log.warn "Copying DB from: " + source['host']
+        execute "mysql-dump-" + source['host'] do 
+          command "mysqldump -h #{source['host']} -u #{source['user']} -p'#{source["password"]}' #{source['name']} > /tmp/dump.sql"
+        end
+        execute "mysql-load-" + source['host'] do
+          command "mysql -h #{db_settings['host']} -u #{db_settings['user']} -p'#{db_settings['password']}' #{db_settings['name']} < /tmp/dump.sql"
+        end
+        file "/tmp/dump.sql" do
+          action :delete
+        end
+      end
+    end
   end
 end
 
