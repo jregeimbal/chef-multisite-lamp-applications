@@ -16,9 +16,32 @@ node["web_projects"].split(",").each do |project|
   # Grab the settings from the "applications::[project]" data bag
   settings = data_bag_item('applications', project)
   
-  if settings[settings_env]["vhost"]
-    vhost_settings = settings[settings_env]["vhost"]
+  defaults = settings['default']
 
+  env_settings = settings[settings_env]
+
+  # class ::Hash
+  #   def deep_merge(other_hash)
+  #          self.merge(other_hash) do |key, oldval, newval|
+  #            oldval = oldval.to_hash if oldval.respond_to?(:to_hash)
+  #            newval = newval.to_hash if newval.respond_to?(:to_hash)
+  #            oldval.class.to_s == 'Hash' && newval.class.to_s == 'Hash' ? oldval.deep_merge(newval) : newval
+  #          end
+  #        end
+  # end
+
+  # env_settings.deep_merge(defaults)
+
+  # log env_settings
+
+  vhost_settings = settings[settings_env]["vhost"]
+  app_settings = env_settings["application"]
+  db_settings = env_settings["database"]
+  wp_settings = env_settings["wordpress"]
+  drupal_settings = settings[settings_env]["drupal"]
+  yii_settings = env_settings["yii"]
+
+  if vhost_settings
     web_app project do
       template vhost_settings['template'] || 'apache-vhost.conf.erb'
       server_name vhost_settings['server_name'] if vhost_settings["server_name"]
@@ -26,20 +49,17 @@ node["web_projects"].split(",").each do |project|
       docroot vhost_settings['docroot'] if vhost_settings['docroot']
     end
   end
-  #stuff
-
-  app_settings = settings[settings_env]["application"]
-  db_settings = settings[settings_env]["database"]
-  wp_settings = settings[settings_env]["wordpress"]
-  drupal_settings = settings[settings_env]["drupal"]
-  yii_settings = settings[settings_env]["yii"]
 
   if yii_settings then
     include_recipe "yii"
   end
 
-  
-  
+  group "www-data" do
+    action :modify
+    members "ubuntu"
+    append true
+  end
+
   # Deploy Using the PHP Wordpress Application Cookbook
   application project do
     action :deploy
@@ -77,7 +97,9 @@ node["web_projects"].split(",").each do |project|
           secure_auth_salt  wp_settings["secure_auth_salt"] == 'RANDOM' ? secure_password : wp_settings["secure_auth_salt"]
           logged_in_salt    wp_settings["logged_in_salt"]  == 'RANDOM' ? secure_password : wp_settings["logged_in_salt"]
           nonce_salt        wp_settings["nonce_salt"] == 'RANDOM' ? secure_password : wp_settings["nonce_salt"]
-          wp_lang           wp_settings["wp_lang"]   
+          wp_lang           wp_settings["wp_lang"]  
+          wp_home           wp_settings["wp_home"] 
+          wp_siteurl        wp_settings["wp_siteurl"]   
           display_errors    wp_settings["display_errors"] 
           wp_debug_display  wp_settings["wp_debug_display"] 
           savequeries    wp_settings["savequeries"] 
@@ -105,6 +127,22 @@ node["web_projects"].split(",").each do |project|
       #   end
       # end
     end
+  end
+
+  if wp_settings then
+    # wordpress thing! :
+    directory "wordpress upload directory" do
+      path app_settings['path'] + '/shared/uploads'
+      owner "www-data"
+      group "www-data"
+      mode 00775
+      action :create
+    end
+  end
+
+  execute "fixup apppath group write" do
+    command "chmod -R g+w " + app_settings['path']
+    # only_if { Etc.getpwuid(File.stat(vhost_settings['docroot']).uid).name != "bob" }
   end
 
   if db_settings then

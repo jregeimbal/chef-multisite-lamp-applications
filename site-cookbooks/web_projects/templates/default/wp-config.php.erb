@@ -18,6 +18,9 @@ if ( file_exists( dirname( __FILE__ ) . '/wp-config-local.php' ) ) {
     $table_prefix  = '<%= @database[:table_prefix] %>';
  
 }
+
+<% if @wp_params[:wp_home] then %>if (!defined('WP_HOME')) define('WP_HOME','<%= @wp_params[:wp_home] %>');<% end %>
+<% if @wp_params[:wp_siteurl] then %>if (!defined('WP_SITEURL')) define('WP_SITEURL','<%= @wp_params[:wp_siteurl] %>');<% end %>
  
  
 // ========================
