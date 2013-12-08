@@ -7,10 +7,7 @@
   "run_list": [
     "role[web]",
     "recipe[php]",
-    "recipe[apache2::mod_php5]",
-    "recipe[php::module_apc]",
-    "recipe[php::module_curl]",
-    "recipe[php::module_mysql]"
+    "recipe[apache2::mod_php5]"
   ],
   "env_run_lists" : {},
   "override_attributes": {}
