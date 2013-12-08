@@ -11,6 +11,7 @@ depends 'application_php'
 depends 'application_php_wordpress'
 depends 'mysql'
 depends 'database'
+depends "yii"
 
 %w{ debian ubuntu centos suse fedora redhat scientific amazon }.each do |os|
   supports os

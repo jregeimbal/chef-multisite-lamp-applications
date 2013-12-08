@@ -16,9 +16,31 @@ node["web_projects"].split(",").each do |project|
   # Grab the settings from the "applications::[project]" data bag
   settings = data_bag_item('applications', project)
   
-  if settings[settings_env]["vhost"]
-    vhost_settings = settings[settings_env]["vhost"]
+  defaults = settings['default']
 
+  env_settings = settings[settings_env]
+
+  # class ::Hash
+  #   def deep_merge(other_hash)
+  #          self.merge(other_hash) do |key, oldval, newval|
+  #            oldval = oldval.to_hash if oldval.respond_to?(:to_hash)
+  #            newval = newval.to_hash if newval.respond_to?(:to_hash)
+  #            oldval.class.to_s == 'Hash' && newval.class.to_s == 'Hash' ? oldval.deep_merge(newval) : newval
+  #          end
+  #        end
+  # end
+
+  # env_settings.deep_merge(defaults)
+
+  # log env_settings
+
+  vhost_settings = settings[settings_env]["vhost"]
+  app_settings = env_settings["application"]
+  db_settings = env_settings["database"]
+  wp_settings = env_settings["wordpress"]
+  yii_settings = env_settings["yii"]
+
+  if vhost_settings
     web_app project do
       template vhost_settings['template'] || 'apache-vhost.conf.erb'
       server_name vhost_settings['server_name'] if vhost_settings["server_name"]
@@ -26,55 +48,80 @@ node["web_projects"].split(",").each do |project|
       docroot vhost_settings['docroot'] if vhost_settings['docroot']
     end
   end
-  #stuff
 
-  db_settings = settings[settings_env]["database"]
-  wp_settings = settings[settings_env]["wp_params"]
-  
+  if yii_settings then
+    include_recipe "yii"
+  end  
+
+  group "www-data" do
+    action :modify
+    members "ubuntu"
+    append true
+  end
+
+   
   # Deploy Using the PHP Wordpress Application Cookbook
   application project do
     action :deploy
-    path wp_settings["path"]
+    path app_settings["path"]
     owner node[:apache][:user]
     group node[:apache][:user]
-    repository "https://github.com/WordPress/WordPress.git"
+    repository app_settings["repository"]
     enable_submodules true
-    # deploy_key "-----BEGIN RSA PRIVATE KEY-----[KEY IN HERE]-----END RSA PRIVATE KEY-----"
-    revision "master"
-    symlinks(
-      "uploads" => "wp-content/uploads",
-      "wp-config.php" => "wp-config.php"
-    )
-   
-    wordpress do
-      local_settings_file   "wp-config.php"
-      database do
-        db_name       db_settings["db_name"]
-        db_user       db_settings["db_user"]
-        db_password   db_settings["db_password"]
-        db_host       db_settings["db_host"]
-        db_charset    db_settings["db_charset"]
-        db_collate    db_settings["db_collate"]
-        table_prefix  db_settings["table_prefix"]
-      end
-      wp_params do
-        auth_key          wp_settings["auth_key"] == 'RANDOM' ? secure_password : wp_settings["auth_key"]
-        secure_auth_key   wp_settings["secure_auth_key"]  == 'RANDOM' ? secure_password : wp_settings["secure_auth_key"]
-        logged_in_key     wp_settings["logged_in_key"]  == 'RANDOM' ? secure_password : wp_settings["logged_in_key"]
-        nonce_key         wp_settings["nonce_key"] == 'RANDOM' ? secure_password : wp_settings["nonce_key"]
-        auth_salt         wp_settings["auth_salt"] == 'RANDOM' ? secure_password : wp_settings["auth_salt"]
-        secure_auth_salt  wp_settings["secure_auth_salt"] == 'RANDOM' ? secure_password : wp_settings["secure_auth_salt"]
-        logged_in_salt    wp_settings["logged_in_salt"]  == 'RANDOM' ? secure_password : wp_settings["logged_in_salt"]
-        nonce_salt        wp_settings["nonce_salt"] == 'RANDOM' ? secure_password : wp_settings["nonce_salt"]
-        wp_lang           wp_settings["wp_lang"]   
-        display_errors    wp_settings["display_errors"] 
-        wp_debug_display  wp_settings["wp_debug_display"] 
-        savequeries    wp_settings["savequeries"] 
-        wp_debug  wp_settings["wp_debug"]
-        wp_content_dir    wp_settings["path"] + 'current/wp-content'
-        wp_content_url    '/wp-content'
+    deploy_key app_settings["deploy_key"] if app_settings["deploy_key"]
+    revision app_settings["branch"] || "master"
+
+    if wp_settings then
+      symlinks(
+        "uploads" => "wp-content/uploads",
+        "wp-config.php" => "wp-config.php"
+      )
+      wordpress do
+        local_settings_file   "wp-config.php"
+        database do
+          db_name       db_settings["db_name"]
+          db_user       db_settings["db_user"]
+          db_password   db_settings["db_password"]
+          db_host       db_settings["db_host"]
+          db_charset    db_settings["db_charset"]
+          db_collate    db_settings["db_collate"]
+          table_prefix  db_settings["table_prefix"]
+        end
+        wp_params do
+          auth_key          wp_settings["auth_key"] == 'RANDOM' ? secure_password : wp_settings["auth_key"]
+          secure_auth_key   wp_settings["secure_auth_key"]  == 'RANDOM' ? secure_password : wp_settings["secure_auth_key"]
+          logged_in_key     wp_settings["logged_in_key"]  == 'RANDOM' ? secure_password : wp_settings["logged_in_key"]
+          nonce_key         wp_settings["nonce_key"] == 'RANDOM' ? secure_password : wp_settings["nonce_key"]
+          auth_salt         wp_settings["auth_salt"] == 'RANDOM' ? secure_password : wp_settings["auth_salt"]
+          secure_auth_salt  wp_settings["secure_auth_salt"] == 'RANDOM' ? secure_password : wp_settings["secure_auth_salt"]
+          logged_in_salt    wp_settings["logged_in_salt"]  == 'RANDOM' ? secure_password : wp_settings["logged_in_salt"]
+          nonce_salt        wp_settings["nonce_salt"] == 'RANDOM' ? secure_password : wp_settings["nonce_salt"]
+          wp_lang           wp_settings["wp_lang"]  
+          wp_home           wp_settings["wp_home"] 
+          wp_siteurl        wp_settings["wp_siteurl"]   
+          display_errors    wp_settings["display_errors"] 
+          wp_debug_display  wp_settings["wp_debug_display"] 
+          savequeries    wp_settings["savequeries"] 
+          wp_debug  wp_settings["wp_debug"]
+          wp_content_dir    app_settings["path"] + '/current/wp-content'
+          wp_content_url    '/wp-content'
+        end
       end
     end
+  end
+
+  # wordpress thing! :
+  directory "wordpress upload directory" do
+    path app_settings['path'] + '/shared/uploads'
+    owner "www-data"
+    group "www-data"
+    mode 00775
+    action :create
+  end
+
+  execute "fixup apppath group write" do
+    command "chmod -R g+w " + app_settings['path']
+    # only_if { Etc.getpwuid(File.stat(vhost_settings['docroot']).uid).name != "bob" }
   end
 
   mysql_connection_info = {
