@@ -1,9 +1,69 @@
 [submodule "cookbooks/application"]
-    path = cookbooks/application
-    url = git@github.com:jregeimbal/application.git
+	path = cookbooks/application
+	url = https://github.com/jregeimbal/application.git
 [submodule "cookbooks/application_php"]
-    path = cookbooks/application_php
-    url = git@github.com:jregeimbal/application_php.git
+	path = cookbooks/application_php
+	url = https://github.com/jregeimbal/application_php.git
 [submodule "cookbooks/application_php_wordpress"]
 	path = cookbooks/application_php_wordpress
-	url = git@github.com:jregeimbal/application_php_wordpress.git
+	url = https://github.com/jregeimbal/application_php_wordpress.git
+[submodule "cookbooks/apache2"]
+	path = cookbooks/apache2
+	url = https://github.com/opscode-cookbooks/apache2.git
+[submodule "cookbooks/apt"]
+	path = cookbooks/apt
+	url = https://github.com/opscode-cookbooks/apt.git
+[submodule "cookbooks/aws"]
+	path = cookbooks/aws
+	url = https://github.com/opscode-cookbooks/aws.git
+[submodule "cookbooks/build-essential"]
+	path = cookbooks/build-essential
+	url = https://github.com/opscode-cookbooks/build-essential.git
+[submodule "cookbooks/chef_handler"]
+	path = cookbooks/chef_handler
+	url = https://github.com/opscode-cookbooks/chef_handler.git
+[submodule "cookbooks/database"]
+	path = cookbooks/database
+	url = https://github.com/opscode-cookbooks/database.git
+[submodule "cookbooks/dmg"]
+	path = cookbooks/dmg
+	url = https://github.com/opscode-cookbooks/dmg.git
+[submodule "cookbooks/git"]
+	path = cookbooks/git
+	url = https://github.com/opscode-cookbooks/git.git
+[submodule "cookbooks/homesick"]
+	path = cookbooks/homesick
+	url = https://github.com/opscode-cookbooks/homesick.git
+[submodule "cookbooks/mysql"]
+	path = cookbooks/mysql
+	url = https://github.com/opscode-cookbooks/mysql.git
+[submodule "cookbooks/openssl"]
+	path = cookbooks/openssl
+	url = https://github.com/opscode-cookbooks/openssl.git
+[submodule "cookbooks/php"]
+	path = cookbooks/php
+	url = https://github.com/opscode-cookbooks/php.git
+[submodule "cookbooks/postgresql"]
+	path = cookbooks/postgresql
+	url = https://github.com/opscode-cookbooks/postgresql.git
+[submodule "cookbooks/runit"]
+	path = cookbooks/runit
+	url = https://github.com/opscode-cookbooks/runit.git
+[submodule "cookbooks/ssh_known_hosts"]
+	path = cookbooks/ssh_known_hosts
+	url = https://github.com/opscode-cookbooks/ssh_known_hosts.git
+[submodule "cookbooks/vim"]
+	path = cookbooks/vim
+	url = https://github.com/opscode-cookbooks/vim.git
+[submodule "cookbooks/windows"]
+	path = cookbooks/windows
+	url = https://github.com/opscode-cookbooks/windows.git
+[submodule "cookbooks/xfs"]
+	path = cookbooks/xfs
+	url = https://github.com/opscode-cookbooks/xfs.git
+[submodule "cookbooks/xml"]
+	path = cookbooks/xml
+	url = https://github.com/opscode-cookbooks/xml.git
+[submodule "cookbooks/yum"]
+	path = cookbooks/yum
+	url = https://github.com/opscode-cookbooks/yum.git
