@@ -54,10 +54,12 @@ node["web_projects"].split(",").each do |project|
     include_recipe "yii"
   end
 
-  group "www-data" do
-    action :modify
-    members "ubuntu"
-    append true
+  if node["os_user"] then
+    group "www-data" do
+      action :modify
+      members node["os_user"]
+      append true
+    end
   end
 
   # Deploy Using the PHP Wordpress Application Cookbook
