@@ -4,9 +4,6 @@
 [submodule "cookbooks/application_php"]
 	path = cookbooks/application_php
 	url = https://github.com/jregeimbal/application_php.git
-[submodule "site-cookbooks/application_php_wordpress"]
-	path = site-cookbooks/application_php_wordpress
-	url = https://github.com/jregeimbal/application_php_wordpress.git
 [submodule "cookbooks/apache2"]
 	path = cookbooks/apache2
 	url = https://github.com/opscode-cookbooks/apache2.git
@@ -64,3 +61,6 @@
 [submodule "cookbooks/yum"]
 	path = cookbooks/yum
 	url = https://github.com/opscode-cookbooks/yum.git
+[submodule "cookbooks/application_php_wordpress"]
+	path = cookbooks/application_php_wordpress
+	url = https://github.com/jregeimbal/application_php_wordpress.git
