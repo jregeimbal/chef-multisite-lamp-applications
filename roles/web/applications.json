@@ -1,0 +1,13 @@
+{
+  "name": "applications",
+  "chef_type": "role",
+  "json_class": "Chef::Role",
+  "default_attributes": {},
+  "description": "This role will use applications attribute to setup applications",
+  "run_list": [
+    "role[web/php]",
+    "recipe[applications_from_databags]"
+  ],
+  "env_run_lists" : {},
+  "override_attributes": {}
+}

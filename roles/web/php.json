@@ -1,5 +1,5 @@
 {
-  "name": "web_php",
+  "name": "php",
   "chef_type": "role",
   "json_class": "Chef::Role",
   "default_attributes": {},

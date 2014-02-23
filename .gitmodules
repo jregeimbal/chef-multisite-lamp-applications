@@ -64,3 +64,6 @@
 [submodule "cookbooks/application_php_wordpress"]
 	path = cookbooks/application_php_wordpress
 	url = https://github.com/jregeimbal/application_php_wordpress.git
+[submodule "cookbooks/applications_from_databags"]
+	path = cookbooks/applications_from_databags
+	url = https://github.com/jregeimbal/applications_from_databags.git
